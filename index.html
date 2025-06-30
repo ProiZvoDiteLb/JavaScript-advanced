@@ -8,7 +8,7 @@
 
 <body>
   <div class="container">
-    <ul class="comments">
+    <ul class="comments" id="comments-list">
       <li class="comment">
         <div class="comment-header">
           <div>Глеб Фокин</div>
@@ -56,7 +56,51 @@
 
 <script>
   "use strict";
-  // Код писать здесь
+
+  const nameInput = document.querySelector('.add-form-name'); //Создаем переменную и ищем элемент с классом .add-form-name
+  const commentInput = document.querySelector('.add-form-text'); //Создаем переменную и ищем элемент с классом .add-form-text
+  const submitButton = document.querySelector('.add-form-button'); //Создаем переменную и ищем элемент с классом .add-form-button
+  const commentsList = document.getElementById('comments-list'); //Создаем переменную и ищем элемент с id comments-list
+
+  // Обработчик события для кнопки "Написать"
+  submitButton.addEventListener('click', () => {
+    const name = nameInput.value.trim();
+    const comment = commentInput.value.trim();
+
+    // Проверка на наличие имени и комментария
+    if (name === '' || comment === '') {
+      alert('Пожалуйста, заполните все поля.');
+      return;
+    }
+
+    // Создаем новый элемент комментария
+    const newComment = document.createElement('li');
+    newComment.classList.add('comment');
+    newComment.innerHTML = `
+      <div class="comment-header">
+        <div>${name}</div>
+        <div>${new Date().toLocaleString()}</div>
+      </div>
+      <div class="comment-body">
+        <div class="comment-text">${comment}</div>
+      </div>
+      <div class="comment-footer">
+        <div class="likes">
+          <span class="likes-counter">0</span>
+          <button class="like-button"></button>
+        </div>
+      </div>
+    `;
+
+    // Добавляем новый комментарий в список
+    commentsList.appendChild(newComment);
+
+    // Очищаем поля ввода
+    nameInput.value = '';
+    commentInput.value = '';
+  });
+
+
   console.log("It works!");
 </script>
 </html>
