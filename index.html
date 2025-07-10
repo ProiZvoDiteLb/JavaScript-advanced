@@ -62,6 +62,12 @@
   const submitButton = document.querySelector('.add-form-button'); //Создаем переменную и ищем элемент с классом .add-form-button
   const commentsList = document.getElementById('comments-list'); //Создаем переменную и ищем элемент с id comments-list
 
+  const btnLike = document.querySelector('.like-button');
+  const btnActivLike = document.querySelector('.-active-like');
+  const likesCounter = document.querySelector('.likes-counter');
+
+
+
   // Обработчик события для кнопки "Написать"
   submitButton.addEventListener('click', () => {
     const name = nameInput.value.trim();
@@ -101,5 +107,14 @@
   });
 
   console.log("It works!");
+
+
+
+
+
+
+
+
+
 </script>
 </html>
