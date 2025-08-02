@@ -4,7 +4,7 @@ import { renderComments } from './modules/renderComments.js'
 const nameInput = document.querySelector('.add-form-name') //Создаем переменную и ищем элемент с классом .add-form-name
 const commentInput = document.querySelector('.add-form-text') //Создаем переменную и ищем элемент с классом .add-form-text
 const submitButton = document.querySelector('.add-form-button') //Создаем переменную и ищем элемент с классом .add-form-button
-const commentsList = document.getElementById('comments-list') //Создаем переменную и ищем элемент с id comments-list
+// const commentsList = document.getElementById('comments-list') //Создаем переменную и ищем элемент с id comments-list
 
 // Обработчик события для кнопки "Написать"
 submitButton.addEventListener('click', () => {
