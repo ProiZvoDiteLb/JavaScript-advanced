@@ -1,5 +1,14 @@
-import { comments } from './modules/comments.js'
+import { comments, updateComments } from './modules/comments.js'
 import { renderComments } from './modules/renderComments.js'
+
+fetch('https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments')
+    .then((response) => {
+        return response.json()
+    })
+    .then((data) => {
+        updateComments(data.comments)
+        renderComments()
+    })
 
 const nameInput = document.querySelector('.add-form-name') //Создаем переменную и ищем элемент с классом .add-form-name
 const commentInput = document.querySelector('.add-form-text') //Создаем переменную и ищем элемент с классом .add-form-text
@@ -40,7 +49,7 @@ submitButton.addEventListener('click', () => {
     commentInput.value = ''
 
     // Рендерим комментарии заново
-    renderComments()
+    // renderComments()
 })
 
 // Инициализация рендеринга комментариев
