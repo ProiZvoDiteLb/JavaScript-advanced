@@ -1,7 +1,7 @@
-import { comments, updateComments } from './modules/comments.js'
+import { updateComments } from './modules/comments.js'
 import { renderComments } from './modules/renderComments.js'
 
-fetch('https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments')
+fetch('https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments') // подключаем API
     .then((response) => {
         return response.json()
     })
@@ -41,16 +41,30 @@ submitButton.addEventListener('click', () => {
         isLiked: false,
     }
 
-    // Добавляем новый комментарий в массив
-    comments.push(newComment)
+    //метод HTTP, который отправляет данные на сервер.
+    fetch('https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments', {
+        method: 'POST',
+        body: JSON.stringify(newComment),
+    })
+        .then((response) => {
+            return response.json()
+        })
+        .then((data) => {
+            updateComments(data.comments)
+            renderComments()
+        })
+
+    /*  // Добавляем новый комментарий в массив
+        comments.push(newComment)
+        */
 
     // Очищаем поля ввода
     nameInput.value = ''
     commentInput.value = ''
 
     // Рендерим комментарии заново
-    // renderComments()
+    renderComments()
 })
 
 // Инициализация рендеринга комментариев
-renderComments()
+// renderComments()
