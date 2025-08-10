@@ -29,17 +29,3 @@ export const renderComments = () => {
     initLikeButtons() // Инициализируем обработчики кликов для кнопок лайков
     initCommentClick() // Инициализация обработчика клика по комментариям
 }
-
-/*
-<div>${comment.name}</div>
-<div>${comment.date}</div>
-заменил
-<div>${comment.author ? comment.author.name : comment.name}</div>
-<div>${comment.date ? new Date(comment.date).toLocaleString() : ''}</div>
-
-<span class="likes-counter">${comment.likes}</span>
-<button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-index="${index}"></button>
-заменил
-<span class="likes-counter">${comment.likes || 0}</span>
-<button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-index="${index}"></button>
-*/
