@@ -1,10 +1,21 @@
-import { comments } from './modules/comments.js'
+import { updateComments } from './modules/comments.js'
 import { renderComments } from './modules/renderComments.js'
+
+// Функция загрузки комментариев
+const loadComments = () => {
+    fetch('https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments')
+        .then((response) => response.json())
+        .then((data) => {
+            updateComments(data.comments)
+            renderComments()
+        })
+}
+// Загрузка комментариев при старте
+loadComments()
 
 const nameInput = document.querySelector('.add-form-name') //Создаем переменную и ищем элемент с классом .add-form-name
 const commentInput = document.querySelector('.add-form-text') //Создаем переменную и ищем элемент с классом .add-form-text
 const submitButton = document.querySelector('.add-form-button') //Создаем переменную и ищем элемент с классом .add-form-button
-const commentsList = document.getElementById('comments-list') //Создаем переменную и ищем элемент с id comments-list
 
 // Обработчик события для кнопки "Написать"
 submitButton.addEventListener('click', () => {
@@ -32,8 +43,20 @@ submitButton.addEventListener('click', () => {
         isLiked: false,
     }
 
-    // Добавляем новый комментарий в массив
-    comments.push(newComment)
+    //метод HTTP, который отправляет данные на сервер.
+    fetch('https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments', {
+        method: 'POST',
+        body: JSON.stringify(newComment),
+    })
+        .then((response) => {
+            return response.json()
+        })
+        .then(() => {
+            // После успешного POST — заново грузим комментарии
+            loadComments()
+            // updateComments(data.comments)
+            // renderComments()
+        })
 
     // Очищаем поля ввода
     nameInput.value = ''
@@ -42,6 +65,3 @@ submitButton.addEventListener('click', () => {
     // Рендерим комментарии заново
     renderComments()
 })
-
-// Инициализация рендеринга комментариев
-renderComments()
