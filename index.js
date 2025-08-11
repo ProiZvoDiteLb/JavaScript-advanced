@@ -1,5 +1,8 @@
 import { updateComments } from './modules/comments.js'
 import { renderComments } from './modules/renderComments.js'
+import { fetchAndRenderComments } from './modules/fetchAndRenderComments.js'
+
+fetchAndRenderComments()
 
 // Функция загрузки комментариев
 const loadComments = () => {
@@ -16,6 +19,7 @@ loadComments()
 const nameInput = document.querySelector('.add-form-name') //Создаем переменную и ищем элемент с классом .add-form-name
 const commentInput = document.querySelector('.add-form-text') //Создаем переменную и ищем элемент с классом .add-form-text
 const submitButton = document.querySelector('.add-form-button') //Создаем переменную и ищем элемент с классом .add-form-button
+const formContainer = document.querySelector('.add-form')
 
 // Обработчик события для кнопки "Написать"
 submitButton.addEventListener('click', () => {
@@ -44,24 +48,17 @@ submitButton.addEventListener('click', () => {
     }
 
     //метод HTTP, который отправляет данные на сервер.
-    fetch('https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments', {
-        method: 'POST',
-        body: JSON.stringify(newComment),
-    })
-        .then((response) => {
-            return response.json()
-        })
-        .then(() => {
-            // После успешного POST — заново грузим комментарии
-            loadComments()
-            // updateComments(data.comments)
-            // renderComments()
-        })
-
-    // Очищаем поля ввода
+    // Очищаем поля ПЕРЕД скрытием формы
     nameInput.value = ''
     commentInput.value = ''
 
-    // Рендерим комментарии заново
-    renderComments()
+    // Скрываем форму и блокируем кнопку
+    formContainer.style.display = 'none'
+    submitButton.disabled = true
+
+    fetchAndRenderComments.postComment(newComment).then(() => {
+        // Показываем форму и разблокируем кнопку
+        formContainer.style.display = ''
+        submitButton.disabled = false
+    })
 })
