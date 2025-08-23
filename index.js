@@ -1,22 +1,14 @@
-import { updateComments } from './modules/comments.js'
-import { renderComments } from './modules/renderComments.js'
+import { renderLogin } from './modules/renderLogin.js'
+import { token } from './modules/api.js'
 import { fetchAndRenderComments } from './modules/fetchAndRenderComments.js'
 
-fetchAndRenderComments()
-
-/*
-// Функция загрузки комментариев
-const loadComments = () => {
-    fetch('https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments')
-        .then((response) => response.json())
-        .then((data) => {
-            updateComments(data.comments)
-            renderComments()
-        })
+// при старте проверяем, есть ли токен
+if (!token) {
+    renderLogin()
+} else {
+    fetchAndRenderComments()
 }
-// Загрузка комментариев при старте
-loadComments()
-*/
+
 // Сохраняем введённые данные в переменные
 let savedName = ''
 let savedComment = ''
