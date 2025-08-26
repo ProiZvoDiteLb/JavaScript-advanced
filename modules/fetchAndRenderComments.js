@@ -1,7 +1,7 @@
 import { updateComments } from './comments.js'
 import { renderComments } from './renderComments.js'
 
-const host = 'https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments'
+const host = 'https://wedev-api.sky.pro/api/v2/ProiZvoDiteLb/comments'
 
 export const fetchAndRenderComments = () => {
     const commentsList = document.getElementById('comments-list')
