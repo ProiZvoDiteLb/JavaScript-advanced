@@ -59,3 +59,4 @@ export function registration({ login, name, password }) {
         })
     })
 }
+//d yjdm
