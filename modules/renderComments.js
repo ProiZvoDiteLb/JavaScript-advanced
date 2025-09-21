@@ -1,10 +1,12 @@
 import { comments } from './comments.js'
+import { token } from './api.js'
 import { initLikeButtons, initCommentClick } from './initListener.js'
-
-const commentsList = document.getElementById('comments-list')
+import { renderLogin } from './renderLogin.js'
 
 export const renderComments = () => {
-    commentsList.innerHTML = comments
+    const container = document.querySelector('.container')
+
+    const commentsHtml = comments
         .map((comment, index) => {
             return `
         <li class="comment" data-index="${index}">
@@ -26,6 +28,33 @@ export const renderComments = () => {
         })
         .join('')
 
-    initLikeButtons() // Инициализируем обработчики кликов для кнопок лайков
-    initCommentClick() // Инициализация обработчика клика по комментариям
+    const addCommentsHTML = `
+    <div class="add-form">
+      <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="name-input">
+      <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4" id="text-input"></textarea>
+      <div class="add-form-row">
+        <button class="add-form-button">Написать</button>
+      </div>
+    </div>
+    <div class="add-form-loading" style="display: none; margin-top: 20px">
+      Комментарий добавляется...
+    </div>`
+
+    const linkToLogin = `<p>Чтобы отправить комментарий, <span class="link-login">войдите</span></p>`
+
+    const baseHtml = `
+      <ul id="comments-list">${commentsHtml}</ul>
+      ${token ? addCommentsHTML : linkToLogin}
+    `
+    container.innerHTML = baseHtml
+
+    const loginLink = document.querySelector('.link-login')
+    if (loginLink) {
+        loginLink.addEventListener('click', () => {
+            renderLogin()
+        })
+    }
+
+    initLikeButtons()
+    initCommentClick()
 }

@@ -5,7 +5,9 @@ const host = 'https://wedev-api.sky.pro/api/v2/ProiZvoDiteLb/comments'
 
 export const fetchAndRenderComments = () => {
     const commentsList = document.getElementById('comments-list')
-    commentsList.innerHTML = `<li>Пожалуйста, подождите, загружаю комментарии...</li>`
+    if (commentsList) {
+        commentsList.innerHTML = `<li>Пожалуйста, подождите, загружаю комментарии...</li>`
+    }
 
     return fetch(host)
         .then((response) => {

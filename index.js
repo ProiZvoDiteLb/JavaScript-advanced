@@ -1,102 +1,82 @@
-import { updateComments } from './modules/comments.js'
 import { renderComments } from './modules/renderComments.js'
 import { fetchAndRenderComments } from './modules/fetchAndRenderComments.js'
+import { postComment } from './modules/api.js'
+import { updateComments } from './modules/comments.js'
 
+export { initFormListeners }
+
+// Сначала создаём пустую разметку
+renderComments()
+
+// Потом загружаем комментарии
 fetchAndRenderComments()
 
-/*
-// Функция загрузки комментариев
-const loadComments = () => {
-    fetch('https://wedev-api.sky.pro/api/v1/ProiZvoDiteLb/comments')
-        .then((response) => response.json())
-        .then((data) => {
-            updateComments(data.comments)
-            renderComments()
-        })
-}
-// Загрузка комментариев при старте
-loadComments()
-*/
-// Сохраняем введённые данные в переменные
-let savedName = ''
+// Сохраняем введённый текст, чтобы не потерялся при рендере
 let savedComment = ''
-
-const nameInput = document.querySelector('.add-form-name') //Создаем переменную и ищем элемент с классом .add-form-name
-const commentInput = document.querySelector('.add-form-text') //Создаем переменную и ищем элемент с классом .add-form-text
-const submitButton = document.querySelector('.add-form-button') //Создаем переменную и ищем элемент с классом .add-form-button
-const formContainer = document.querySelector('.add-form')
+const commentInput = document.querySelector('.add-form-text')
+const submitButton = document.querySelector('.add-form-button')
 
 // Отслеживаем ввод
-nameInput.addEventListener('input', () => (savedName = nameInput.value))
-commentInput.addEventListener(
-    'input',
-    () => (savedComment = commentInput.value),
-)
+if (commentInput) {
+    commentInput.addEventListener(
+        'input',
+        () => (savedComment = commentInput.value),
+    )
+}
 
-// Восстанавливаем значения после рендера
+// Восстановление значения после рендера
 const restoreFormValues = () => {
-    nameInput.value = savedName
-    commentInput.value = savedComment
+    if (commentInput) commentInput.value = savedComment
 }
 restoreFormValues()
 
-// Обработчик события для кнопки "Написать"
-submitButton.addEventListener('click', () => {
-    const name = nameInput.value
-        .trim()
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;') //используем replaceAll() для замены символов < и > на их HTML-сущности &lt; и &gt;
-    const comment = commentInput.value
-        .trim()
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;') //используем replaceAll() для замены символов < и > на их HTML-сущности &lt; и &gt;
+// Обработчик кнопки "Написать"
+if (submitButton) {
+    submitButton.addEventListener('click', () => {
+        const text = commentInput.value
+            .trim()
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
 
-    // Проверка на наличие имени и комментария
-    if (name === '' || comment === '') {
-        alert('Пожалуйста, заполните все поля.')
-        return
-    }
+        const nameInput = document.querySelector('.add-form-name')
+        const authorName = nameInput ? nameInput.value.trim() : ''
 
-    // Создаем новый комментарий
-    const newComment = {
-        name: name,
-        // date: new Date().toLocaleString(),
-        date: new Date().toISOString(),
-        text: comment,
-        likes: 0,
-        isLiked: false,
-    }
+        if (!text || !authorName) {
+            alert('Пожалуйста, заполните имя и комментарий.')
+            return
+        }
 
-    /*  очищение убираем, если очищать поля сразу, а запрос упадёт (400, 500, или пропадёт интернет), пользователь потеряет весь введённый текст.
-    //метод HTTP, который отправляет данные на сервер.
-    // Очищаем поля ПЕРЕД скрытием формы
-    nameInput.value = ''
-    commentInput.value = ''
-    */
+        // сохраняем значение перед отправкой
+        savedComment = text
 
-    // Сохраняем значения перед скрытием формы
-    savedName = name
-    savedComment = comment
+        // блокируем кнопку
+        submitButton.disabled = true
+        submitButton.textContent = 'Отправка...'
 
-    // Скрываем форму и блокируем кнопку
-    formContainer.style.display = 'none'
-    submitButton.disabled = true
+        postComment(text, authorName)
+            .then((newComments) => {
+                updateComments(newComments)
+                renderComments()
+                restoreFormValues()
+                initFormListeners() // снова навешиваем обработчики
+            })
+            .catch((err) => {
+                restoreFormValues()
+                alert(err.message || 'Ошибка при отправке комментария')
+            })
+            .finally(() => {
+                submitButton.disabled = false
+                submitButton.textContent = 'Написать'
+                commentInput.value = ''
+                savedComment = ''
+            })
+    })
+}
 
-    fetchAndRenderComments
-        .postComment(newComment)
-        .then(() => {
-            savedName = ''
-            savedComment = ''
-            nameInput.value = ''
-            commentInput.value = ''
-        })
-        .catch(() => {
-            // В случае ошибки форма не очищается
-            restoreFormValues()
-        })
-        .finally(() => {
-            // Показываем форму и разблокируем кнопку
-            formContainer.style.display = ''
-            submitButton.disabled = false
-        })
-})
+// Функция для повторной привязки обработчиков после рендера
+const initFormListeners = () => {
+    const submitBtn = document.querySelector('.add-form-button')
+    const textInput = document.querySelector('.add-form-text')
+    if (!submitBtn || !textInput) return
+    submitBtn.addEventListener('click', () => submitBtn.click())
+}
