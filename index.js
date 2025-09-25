@@ -2,6 +2,7 @@ import { renderComments } from './modules/renderComments.js'
 import { fetchAndRenderComments } from './modules/fetchAndRenderComments.js'
 import { postComment } from './modules/api.js'
 import { updateComments } from './modules/comments.js'
+import { getName, token } from './modules/api.js'
 
 export { initFormListeners }
 
@@ -13,8 +14,8 @@ fetchAndRenderComments()
 
 // Сохраняем введённый текст, чтобы не потерялся при рендере
 let savedComment = ''
+/*
 const commentInput = document.querySelector('.add-form-text')
-const submitButton = document.querySelector('.add-form-button')
 
 // Отслеживаем ввод
 if (commentInput) {
@@ -24,59 +25,92 @@ if (commentInput) {
     )
 }
 
+
 // Восстановление значения после рендера
 const restoreFormValues = () => {
-    if (commentInput) commentInput.value = savedComment
+    const commentInputCurrent = document.querySelector('.add-form-text')
+    if (commentInputCurrent) commentInputCurrent.value = savedComment
 }
-restoreFormValues()
+*/
 
-// Обработчик кнопки "Написать"
-if (submitButton) {
-    submitButton.addEventListener('click', () => {
-        const text = commentInput.value
-            .trim()
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
+// Восстановление значения после рендера
+const restoreFormValues = () => {
+    const commentInputCurrent = document.querySelector('.add-form-text')
+    if (commentInputCurrent) commentInputCurrent.value = savedComment
+}
 
-        const nameInput = document.querySelector('.add-form-name')
-        const authorName = nameInput ? nameInput.value.trim() : ''
+// Основная функция отправки комментария
+const handleSubmit = () => {
+    const submitButton = document.querySelector('.add-form-button')
+    const textarea = document.querySelector('.add-form-text')
+    if (!textarea) return
+    const text = textarea.value
+        .trim()
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
 
-        if (!text || !authorName) {
-            alert('Пожалуйста, заполните имя и комментарий.')
-            return
-        }
+    if (!text) {
+        alert('Пожалуйста, заполните комментарий.')
+        return
+    }
 
-        // сохраняем значение перед отправкой
-        savedComment = text
+    // сохраняем значение перед отправкой
+    savedComment = text
 
-        // блокируем кнопку
+    // блокируем кнопку
+    if (submitButton) {
         submitButton.disabled = true
         submitButton.textContent = 'Отправка...'
+    }
 
-        postComment(text, authorName)
-            .then((newComments) => {
-                updateComments(newComments)
-                renderComments()
-                restoreFormValues()
-                initFormListeners() // снова навешиваем обработчики
-            })
-            .catch((err) => {
-                restoreFormValues()
-                alert(err.message || 'Ошибка при отправке комментария')
-            })
-            .finally(() => {
+    const authorName = getName()
+    if (!authorName || !token) {
+        alert('Вы должны войти, чтобы отправить комментарий')
+        if (submitButton) {
+            submitButton.disabled = false
+            submitButton.textContent = 'Написать'
+        }
+        return
+    }
+
+    postComment(text) // теперь не передаём authorName
+        .then((newComments) => {
+            updateComments(newComments)
+            renderComments()
+            restoreFormValues()
+        })
+        .catch((err) => {
+            restoreFormValues()
+            alert(err.message || 'Ошибка при отправке комментария')
+        })
+        .finally(() => {
+            if (submitButton) {
                 submitButton.disabled = false
                 submitButton.textContent = 'Написать'
-                commentInput.value = ''
-                savedComment = ''
-            })
-    })
+            }
+            const currentInput = document.querySelector('.add-form-text')
+            if (currentInput) currentInput.value = ''
+            savedComment = ''
+        })
 }
 
-// Функция для повторной привязки обработчиков после рендера
+// Навешивание обработчиков на актуальные элементы формы
 const initFormListeners = () => {
-    const submitBtn = document.querySelector('.add-form-button')
+    const submitButton = document.querySelector('.add-form-button')
     const textInput = document.querySelector('.add-form-text')
-    if (!submitBtn || !textInput) return
-    submitBtn.addEventListener('click', () => submitBtn.click())
+    if (!submitButton || !textInput) return
+
+    // перезаписываем старые обработчики (чтобы не дублировались)
+    submitButton.onclick = handleSubmit
+    textInput.oninput = () => (savedComment = textInput.value)
+
+    // Восстанавливаем значение, если было сохранено
+    if (savedComment) textInput.value = savedComment
 }
+
+// Событие, которое высылает renderComments() после отрисовки,
+// чтобы мы могли навесить обработчики на вновь созданные элементы
+document.addEventListener('commentsRendered', initFormListeners)
+
+// Изначальная привязка обработчика (если форма уже на странице)
+initFormListeners()

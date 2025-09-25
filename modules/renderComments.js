@@ -2,6 +2,7 @@ import { comments } from './comments.js'
 import { token } from './api.js'
 import { initLikeButtons, initCommentClick } from './initListener.js'
 import { renderLogin } from './renderLogin.js'
+import { getName } from './api.js'
 
 export const renderComments = () => {
     const container = document.querySelector('.container')
@@ -29,8 +30,13 @@ export const renderComments = () => {
         .join('')
 
     const addCommentsHTML = `
-    <div class="add-form">
-      <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="name-input">
+      <div class="add-form">
+    <input 
+      type="text" 
+      class="add-form-name" 
+          value="${getName()}" 
+          readonly
+    >
       <textarea class="add-form-text" placeholder="Введите ваш комментарий" rows="4" id="text-input"></textarea>
       <div class="add-form-row">
         <button class="add-form-button">Написать</button>
@@ -57,4 +63,6 @@ export const renderComments = () => {
 
     initLikeButtons()
     initCommentClick()
+
+    document.dispatchEvent(new CustomEvent('commentsRendered'))
 }

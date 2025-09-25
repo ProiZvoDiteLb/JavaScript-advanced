@@ -3,6 +3,7 @@ const authHost = 'https://wedev-api.sky.pro/api/user'
 
 export let token = ''
 export let name = ''
+export const getName = () => name
 
 export const updateToken = (newToken) => {
     token = newToken
@@ -30,13 +31,19 @@ export const fetchComments = () => {
 }
 
 // Отправка комментария
-export const postComment = (text, authorName) => {
+export const postComment = (text) => {
+    if (!token) {
+        return Promise.reject(
+            new Error('Вы должны войти, чтобы оставить комментарий'),
+        )
+    }
+
     return fetch(host + '/comments', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ text, name: authorName }),
+        body: JSON.stringify({ text }),
     }).then((response) => {
         if (!response.ok) {
             if (response.status === 400)

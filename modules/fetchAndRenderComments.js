@@ -1,7 +1,19 @@
 import { updateComments } from './comments.js'
 import { renderComments } from './renderComments.js'
+import { token } from './api.js'
 
 const host = 'https://wedev-api.sky.pro/api/v2/ProiZvoDiteLb/comments'
+
+// функция преобразования даты
+const transformDate = (dateString) => {
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hours}:${minutes}`
+}
 
 export const fetchAndRenderComments = () => {
     const commentsList = document.getElementById('comments-list')
@@ -9,7 +21,9 @@ export const fetchAndRenderComments = () => {
         commentsList.innerHTML = `<li>Пожалуйста, подождите, загружаю комментарии...</li>`
     }
 
-    return fetch(host)
+    return fetch(host, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
         .then((response) => {
             if (response.status === 500) {
                 throw new Error('500')
@@ -17,7 +31,14 @@ export const fetchAndRenderComments = () => {
             return response.json()
         })
         .then((data) => {
-            updateComments(data.comments)
+            const transformed = data.comments.map((comment) => ({
+                name: comment.author?.name || 'Аноним',
+                text: comment.text,
+                date: transformDate(comment.date),
+                likes: comment.likes || 0,
+                isLiked: comment.isLiked || false,
+            }))
+            updateComments(transformed)
             renderComments()
         })
         .catch((error) => {
