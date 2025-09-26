@@ -1,8 +1,8 @@
 import { comments } from './comments.js'
 import { renderComments } from './renderComments.js'
 
-const nameInput = document.querySelector('.add-form-name')
-const commentInput = document.querySelector('.add-form-text')
+// const nameInput = document.querySelector('.add-form-name')
+// const commentInput = document.querySelector('.add-form-text')
 
 export const initLikeButtons = () => {
     const likeButtons = document.querySelectorAll('.like-button')
@@ -23,13 +23,19 @@ export const initLikeButtons = () => {
 
 export const initCommentClick = () => {
     const commentItems = document.querySelectorAll('.comment')
+    const nameInput = document.querySelector('.add-form-name')
+    const commentInput = document.querySelector('.add-form-text')
 
     commentItems.forEach((item) => {
         item.addEventListener('click', () => {
             const index = item.dataset.index
             const comment = comments[index]
-            nameInput.value = comment.name
-            commentInput.value = comment.text + ' '
+            if (!comment) return
+            if (nameInput)
+                nameInput.value = comment.author
+                    ? comment.author.name
+                    : comment.name || ''
+            if (commentInput) commentInput.value = (comment.text || '') + ' '
         })
     })
 }
