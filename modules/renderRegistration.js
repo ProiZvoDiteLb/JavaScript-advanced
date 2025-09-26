@@ -1,39 +1,58 @@
 import { registration, updateToken, updateName } from './api.js'
 import { fetchAndRenderComments } from './fetchAndRenderComments.js'
+import { renderComments } from './renderComments.js'
+import { renderLogin } from './renderLogin.js'
 
 export const renderRegistration = () => {
     const container = document.querySelector('.container')
 
-    const registrationHtml = `
-        <h1>Страница регистрации</h1>
-        <div class="form">
-            <h3 class="form-title">Форма регистрации</h3>
-            <div class="form-row">
-                <input type="text" id="name-input" class="input" placeholder="Имя">
-                <input type="text" id="login-input" class="input" placeholder="Логин">
-                <input type="password" id="password-input" class="input" placeholder="Пароль">
-            </div>
-            <br>
-            <button class="button" id="reg-button">Зарегистрироваться</button>
-            <button class="button" id="back-login">Назад к входу</button>
-        </div>
-    `
-    container.innerHTML = registrationHtml
+    container.innerHTML = `
+    <div class="add-form">
+      <h3 style="margin-bottom: 10px;">Регистрация</h3>
+      <input 
+        type="text" 
+        class="add-form-name name-input" 
+        placeholder="Введите имя"
+      >
+      <input 
+        type="text" 
+        class="add-form-name login-input" 
+        placeholder="Введите логин"
+        style="margin-top: 10px;"
+      >
+      <input 
+        type="password" 
+        class="add-form-name password-input" 
+        placeholder="Введите пароль"
+        style="margin-top: 10px;"
+      >
+      <div class="add-form-row">
+        <button class="add-form-button register-button">Зарегистрироваться</button>
+      </div>
+      <p style="margin-top: 10px; font-size: 14px;">
+        Уже есть аккаунт? <span class="link-login" style="cursor: pointer; color: white;">Войдите</span>
+      </p>
+    </div>
+  `
 
-    const nameEl = document.getElementById('name-input')
-    const loginEl = document.getElementById('login-input')
-    const passwordEl = document.getElementById('password-input')
-    const regButton = document.getElementById('reg-button')
-    const backButton = document.getElementById('back-login')
+    const regButton = document.querySelector('.register-button')
+    const nameInputEl = document.querySelector('.name-input')
+    const loginInputEl = document.querySelector('.login-input')
+    const passwordInputEl = document.querySelector('.password-input')
+    const loginLink = document.querySelector('.link-login')
 
-    //  очищаем поля после рендера
-    nameEl.value = ''
-    loginEl.value = ''
-    passwordEl.value = ''
-
-    //  Обработчик кнопки "Зарегистрироваться"
     regButton.addEventListener('click', () => {
-        registration(nameEl.value, loginEl.value, passwordEl.value)
+        const nameVal = nameInputEl.value.trim()
+        const loginVal = loginInputEl.value.trim()
+        const passVal = passwordInputEl.value.trim()
+
+        if (!nameVal || !loginVal || !passVal) {
+            alert('Пожалуйста, заполните все поля')
+            return
+        }
+
+        // Важно: порядок аргументов (name, login, password)
+        registration(nameVal, loginVal, passVal)
             .then((response) => {
                 if (!response.ok) {
                     return response.json().then((err) => {
@@ -43,22 +62,17 @@ export const renderRegistration = () => {
                 return response.json()
             })
             .then((data) => {
-                // сохраняем токен и имя
                 updateToken(data.user.token)
                 updateName(data.user.name)
-
-                // сразу переходим к комментариям (как будто вошли)
                 fetchAndRenderComments()
+                renderComments()
             })
             .catch((err) => {
                 alert(err.message || 'Не удалось зарегистрироваться')
             })
     })
 
-    //  Обработчик кнопки "Назад к входу"
-    backButton.addEventListener('click', () => {
-        import('./renderLogin.js').then((module) => {
-            module.renderLogin()
-        })
+    loginLink.addEventListener('click', () => {
+        renderLogin()
     })
 }

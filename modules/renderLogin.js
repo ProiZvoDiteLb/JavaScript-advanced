@@ -1,83 +1,57 @@
-import { login } from './api.js'
-import { updateToken, updateName } from './api.js'
+import { login, updateToken, updateName } from './api.js'
 import { fetchAndRenderComments } from './fetchAndRenderComments.js'
+import { renderComments } from './renderComments.js'
+import { renderRegistration } from './renderRegistration.js'
 
-//  Отрисовка страницы логина
 export const renderLogin = () => {
     const container = document.querySelector('.container')
 
-    const loginHtml = `
-    <h1>Страница входа</h1>
-    <div class="form">
-        <h3 class="form-title">Форма входа</h3>
-        <div class="form-row">
-            <input type="text" id="login-input" class="input" placeholder="Логин">
-            <input type="password" id="password-input" class="input" placeholder="Пароль">
-        </div>
-        <br>
-        <button class="button" id="login-button">Войти</button>
-        <button class="button" id="reg-button">Зарегистрироваться</button>
+    container.innerHTML = `
+    <div class="add-form">
+      <h3 style="margin-bottom: 10px;">Вход</h3>
+      <input 
+        type="text" 
+        class="add-form-name login-input" 
+        placeholder="Введите логин"
+      >
+      <input 
+        type="password" 
+        class="add-form-name password-input" 
+        placeholder="Введите пароль"
+        style="margin-top: 10px;"
+      >
+      <div class="add-form-row">
+        <button class="add-form-button login-button">Войти</button>
+      </div>
+      <p style="margin-top: 10px; font-size: 14px;">
+        Нет аккаунта? <span class="link-register" style="cursor: pointer; color: white;">Зарегистрируйтесь</span>
+      </p>
     </div>
-    `
-    container.innerHTML = loginHtml
+  `
 
-    const button = document.getElementById('login-button')
-    const loginEl = document.getElementById('login-input')
-    const passwordEl = document.getElementById('password-input')
+    document.querySelector('.login-button').addEventListener('click', () => {
+        const loginInput = document.querySelector('.login-input').value.trim()
+        const passwordInput = document
+            .querySelector('.password-input')
+            .value.trim()
 
-    // очищаем поля после рендера
-    loginEl.value = ''
-    passwordEl.value = ''
+        if (!loginInput || !passwordInput) {
+            alert('Пожалуйста, заполните все поля')
+            return
+        }
 
-    // Обработчик входа
-    button.addEventListener('click', () => {
-        login(loginEl.value.trim(), passwordEl.value.trim())
-            .then((response) => {
-                if (!response.ok) {
-                    return response.json().then((err) => {
-                        throw new Error(err.message || 'Ошибка авторизации')
-                    })
-                }
-                return response.json()
-            })
+        login(loginInput, passwordInput)
+            .then((res) => res.json())
             .then((data) => {
                 updateToken(data.user.token)
                 updateName(data.user.name)
                 fetchAndRenderComments()
+                renderComments()
             })
-            .catch((err) => {
-                alert(err.message || 'Не удалось войти, проверьте логин/пароль')
-            })
+            .catch(() => alert('Неверный логин или пароль'))
     })
 
-    //  Обработчик перехода на страницу регистрации
-    const regButton = document.getElementById('reg-button')
-    if (regButton) {
-        regButton.addEventListener('click', () => {
-            import('./renderRegistration.js')
-                .then((module) => {
-                    module.renderRegistration()
-                })
-                .catch(() => {
-                    alert('Не удалось открыть страницу регистрации')
-                })
-        })
-    }
+    document.querySelector('.link-register').addEventListener('click', () => {
+        renderRegistration()
+    })
 }
-
-/*
-
- из ПОСТМАН
-
-{
-    "user": {
-        "_id": "6421860c32e0301869fb3301",
-        "login": "admin",
-        "password": "admin",
-        "name": "Админ",
-        "token": "asb4c4boc86gasb4c4boc86g37w3cc3bo3b83k4g37k3bk3cg3c03ck4k",
-        "imageUrl": "https://storage.yandexcloud.net/skypro-webdev-homework-bucket/1680601502867-%25C3%2590%25C2%25A1%25C3%2590%25C2%25BD%25C3%2590%25C2%25B8%25C3%2590%25C2%25BC%25C3%2590%25C2%25BE%25C3%2590%25C2%25BA%2520%25C3%2591%25C2%258D%25C3%2590%25C2%25BA%25C3%2591%25C2%2580%25C3%2590%25C2%25B0%25C3%2590%25C2%25BD%25C3%2590%25C2%25B0%25202023-04-04%2520%25C3%2590%25C2%25B2%252014.04.29.png"
-    }
-}
-
-*/
